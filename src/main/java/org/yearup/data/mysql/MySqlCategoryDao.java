@@ -129,7 +129,7 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     public void delete(int categoryId)
     {
         // delete category
-        //done
+        //donedone
         String sql = """
                 Delete
                 From categories

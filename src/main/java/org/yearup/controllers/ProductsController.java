@@ -76,21 +76,29 @@ public class ProductsController
     }
 
     @PutMapping("{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateProduct(@PathVariable int id, @RequestBody Product product)
     {
         try
         {
-            productDao.create(product);
+            //this checks if the product exists before trying to update
+            Product existing = productDao.getById(id);
+            if (existing == null)
+                // If the product does not exist, return a 404 Not Found
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            // this ensures the product ID from the request body matches the ID in the URL
+            product.setProductId(id);
+            //this updates the product in the database using the DAO
+            productDao.update(id,product);
         }
-        catch(Exception ex)
+        catch(ResponseStatusException ex)
         {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
     }
 
     @DeleteMapping("{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteProduct(@PathVariable int id)
     {
         try
