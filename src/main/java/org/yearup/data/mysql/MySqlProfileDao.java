@@ -1,11 +1,14 @@
 package org.yearup.data.mysql;
 
 import org.springframework.stereotype.Component;
+import org.yearup.models.Product;
 import org.yearup.models.Profile;
 import org.yearup.data.ProfileDao;
 
 import javax.sql.DataSource;
 import java.sql.*;
+
+import static org.yearup.data.mysql.MySqlProductDao.mapRow;
 
 @Component
 public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
@@ -40,6 +43,33 @@ public class MySqlProfileDao extends MySqlDaoBase implements ProfileDao
         }
         catch (SQLException e)
         {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void update(int userId, Profile profile)
+    {
+        String sql = "UPDATE profiles " +
+                "SET first_name = ?, last_name = ?, phone = ?, email = ?, address = ?, city = ?, state = ?, zip = ? " +
+                "WHERE user_id = ?";
+
+        try (Connection connection = getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql))
+        {
+            ps.setString(1, profile.getFirstName());
+            ps.setString(2, profile.getLastName());
+            ps.setString(3, profile.getPhone());
+            ps.setString(4, profile.getEmail());
+            ps.setString(5, profile.getAddress());
+            ps.setString(6, profile.getCity());
+            ps.setString(7, profile.getState());
+            ps.setString(8, profile.getZip());
+            ps.setInt(9, userId);
+
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
