@@ -28,11 +28,13 @@ public class ShoppingCartController
     private ProductDao productDao;
 
     // Constructor injection for the Dao's
-    public ShoppingCartController(ShoppingCartDao shoppingCartDao, UserDao userDao, ProductDao productDao) {
+    public ShoppingCartController(ShoppingCartDao shoppingCartDao, UserDao userDao, ProductDao productDao)
+    {
         this.shoppingCartDao = shoppingCartDao;
         this.userDao = userDao;
         this.productDao = productDao;
     }
+
 
     // each method in this controller requires a Principal object as a parameter
     //Returns the shopping cart for the currently logged-in user
@@ -49,11 +51,11 @@ public class ShoppingCartController
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
             int userId = user.getId();
 
-            // use the shoppingcartDao to get all items in the cart and return the cart
+            // use the shoppingCartDao to get all items in the cart and return the cart
             return shoppingCartDao.getByUserId(userId);
         }
-        catch(ResponseStatusException e){
-            throw e;
+        catch(ResponseStatusException ex){
+            throw ex;
         }catch (Exception e)
         {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");

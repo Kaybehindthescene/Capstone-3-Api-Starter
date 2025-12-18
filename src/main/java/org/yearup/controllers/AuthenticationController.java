@@ -84,6 +84,14 @@ public class AuthenticationController {
             // create profile
             Profile profile = new Profile();
             profile.setUserId(user.getId());
+            profile.setFirstName("");
+            profile.setLastName("");
+            profile.setPhone("");
+            profile.setEmail("");
+            profile.setAddress("");
+            profile.setCity("");
+            profile.setState("");
+            profile.setZip("");
             profileDao.create(profile);
 
             return new ResponseEntity<>(user, HttpStatus.CREATED);
