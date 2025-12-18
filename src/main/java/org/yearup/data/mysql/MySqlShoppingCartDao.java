@@ -89,8 +89,10 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
             throw new RuntimeException(e);
         }
     }
+
+
     @Override
-    public void updateProduct(int userId, int productId, int quantity){
+    public void updateProductQuantity(int userId, int productId, int quantity){
         if (quantity <= 0){
             removeProduct(userId,productId);
             return;
@@ -117,6 +119,19 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
         PreparedStatement preparedStatement = connection.prepareStatement(sql)){
             preparedStatement.setInt(1,userId);
             preparedStatement.setInt(2,productId);
+            preparedStatement.executeUpdate();
+        }
+        catch (SQLException e){
+            throw new RuntimeException(e);
+        }
+    }
+    @Override
+    public void clearCart(int userId){
+        String sql = "DELETE FROM shopping_cart_items WHERE user_id = ?;";
+
+        try(Connection connection = getConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(sql)){
+            preparedStatement.setInt(1,userId);
             preparedStatement.executeUpdate();
         }
         catch (SQLException e){
