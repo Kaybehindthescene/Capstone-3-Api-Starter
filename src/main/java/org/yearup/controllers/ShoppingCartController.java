@@ -1,6 +1,10 @@
 package org.yearup.controllers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.ProductDao;
 import org.yearup.data.ShoppingCartDao;
@@ -19,9 +23,15 @@ public class ShoppingCartController
     private UserDao userDao;
     private ProductDao productDao;
 
-
+    // Constructor injection for the Dao's
+    public ShoppingCartController(ShoppingCartDao shoppingCartDao, UserDao userDao, ProductDao productDao) {
+        this.shoppingCartDao = shoppingCartDao;
+        this.userDao = userDao;
+        this.productDao = productDao;
+    }
 
     // each method in this controller requires a Principal object as a parameter
+    @GetMapping
     public ShoppingCart getCart(Principal principal)
     {
         try
@@ -30,12 +40,16 @@ public class ShoppingCartController
             String userName = principal.getName();
             // find database user by userId
             User user = userDao.getByUserName(userName);
+            if (user == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
             int userId = user.getId();
 
             // use the shoppingcartDao to get all items in the cart and return the cart
-            return null;
+            return shoppingCartDao.getByUserId(userId);
         }
-        catch(Exception e)
+        catch(ResponseStatusException e){
+            throw e;
+        }catch (Exception e)
         {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
         }
@@ -43,6 +57,29 @@ public class ShoppingCartController
 
     // add a POST method to add a product to the cart - the url should be
     // https://localhost:8080/cart/products/15 (15 is the productId to be added
+
+    @PostMapping("/products/{productId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addProduct(@PathVariable int productId, Principal principal){
+
+        try {
+            String userName = principal.getName();
+            User user =userDao.getByUserName(userName);
+            if (user == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            int userId = user.getId();
+
+            if (productDao.getById(productId)= null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Product not found");
+            shoppingCartDao.addProduct(userId,productId);
+        }
+        catch (ResponseStatusException exception){
+            throw exception;
+        }
+        catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Oops");
+        }
+    }
 
 
     // add a PUT method to update an existing product in the cart - the url should be
