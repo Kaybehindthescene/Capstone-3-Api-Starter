@@ -1,15 +1,13 @@
 package org.yearup.controllers;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.yearup.data.ProductDao;
 import org.yearup.data.ShoppingCartDao;
 import org.yearup.data.UserDao;
 import org.yearup.models.ShoppingCart;
+import org.yearup.models.ShoppingCartItem;
 import org.yearup.models.User;
 
 import java.security.Principal;
@@ -85,8 +83,24 @@ public class ShoppingCartController
     // add a PUT method to update an existing product in the cart - the url should be
     // https://localhost:8080/cart/products/15 (15 is the productId to be updated)
     // the BODY should be a ShoppingCartItem - quantity is the only value that will be updated
-
-
+    @PutMapping("/products/{productId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateProduct(@PathVariable int productId, @RequestBody ShoppingCartItem item,
+                              Principal principal){
+        try {
+            String username = principal.getName();
+            User user = userDao.getByUserName(username);
+            if (user == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
+            int userId =user.getId();
+            int quantity = item.getQuantity();
+            shoppingCartDao.updateProductQuantity(userId,productId,quantity);
+        }catch (ResponseStatusException exception){
+            throw exception;
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Oops our bad");
+        }
+    }
     // add a DELETE method to clear all products from the current users cart
     // https://localhost:8080/cart
 
