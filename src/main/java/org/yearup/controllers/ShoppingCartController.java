@@ -16,16 +16,17 @@ import java.security.Principal;
 
 // convert this class to a REST controller
 // only logged in users should have access to these actions
-@CrossOrigin
+
 @RestController
 @RequestMapping("/cart")
+@CrossOrigin
 @PreAuthorize("isAuthenticated()")
 public class ShoppingCartController
 {
     // a shopping cart requires
-    private ShoppingCartDao shoppingCartDao;
-    private UserDao userDao;
-    private ProductDao productDao;
+    private final ShoppingCartDao shoppingCartDao;
+    private final UserDao userDao;
+    private final ProductDao productDao;
 
     // Constructor injection for the Dao's
     public ShoppingCartController(ShoppingCartDao shoppingCartDao, UserDao userDao, ProductDao productDao)
@@ -36,31 +37,38 @@ public class ShoppingCartController
     }
 
 
+
     // each method in this controller requires a Principal object as a parameter
     //Returns the shopping cart for the currently logged-in user
-    @GetMapping
+    @GetMapping("")
     public ShoppingCart getCart(Principal principal)
     {
         try
         {
-            // get the currently logged in username
+            if (principal == null)
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not logged in.");
+
             String userName = principal.getName();
-            // find database user by userId
+
             User user = userDao.getByUserName(userName);
             if (user == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found: " + userName);
+
             int userId = user.getId();
 
-            // use the shoppingCartDao to get all items in the cart and return the cart
             return shoppingCartDao.getByUserId(userId);
         }
-        catch(ResponseStatusException ex){
-            throw ex;
-        }catch (Exception e)
+        catch (ResponseStatusException ex)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            throw ex;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace(); // show real root cause
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
+
 
     // add a POST method to add a product to the cart - the url should be
     // https://localhost:8080/cart/products/15 (15 is the productId to be added)

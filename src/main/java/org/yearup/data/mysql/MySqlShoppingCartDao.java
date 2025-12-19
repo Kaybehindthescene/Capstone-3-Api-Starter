@@ -25,11 +25,13 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
     @Override
     public ShoppingCart getByUserId(int userId) {
-        String sql = "SELECT p.product_id, p.name, p.price, p.category_id, p.description, p.subcategory, p.stock, p.featured, p.image_url, " +
-                "       sci.quantity " +
-                "FROM shopping_cart_items sci " +
-                "JOIN products p ON p.product_id = sci.product_id " +
-                "WHERE sci.user_id = ?;";
+        String sql =
+                "SELECT p.product_id, p.name, p.price, p.category_id, p.description, p.subcategory, p.stock, p.featured, p.image_url, " +
+                        "       sci.quantity " +
+                        "FROM shopping_cart sci " +
+                        "JOIN products p ON p.product_id = sci.product_id " +
+                        "WHERE sci.user_id = ?;";
+
         Map<Integer, ShoppingCartItem> items = new HashMap<>();
 
 
@@ -75,7 +77,7 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
 
     @Override
     public void addProduct(int userId, int productId){
-        String sql = "INSERT INTO shopping_cart_items (user_id, product_id, quantity) " +
+        String sql = "INSERT INTO shopping_cart (user_id, product_id, quantity) " +
                 "VALUES (?, ?, 1) " +
                 "ON DUPLICATE KEY UPDATE quantity = quantity + 1;";
 
@@ -126,16 +128,19 @@ public class MySqlShoppingCartDao extends MySqlDaoBase implements ShoppingCartDa
         }
     }
     @Override
-    public void clearCart(int userId){
-        String sql = "DELETE FROM shopping_cart_items WHERE user_id = ?;";
+    public void clearCart(int userId)
+    {
+        String sql = "DELETE FROM shopping_cart WHERE user_id = ?";
 
-        try(Connection connection = getConnection();
-        PreparedStatement preparedStatement = connection.prepareStatement(sql)){
-            preparedStatement.setInt(1,userId);
-            preparedStatement.executeUpdate();
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, userId);
+            statement.executeUpdate();
         }
-        catch (SQLException e){
+        catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
+
 }

@@ -78,10 +78,16 @@ public class AuthenticationController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exists.");
             }
 
+           /*
             // create user
             User user = userDao.create(new User(0, newUser.getUsername(), newUser.getPassword(), newUser.getRole()));
-
+*/
             // create profile
+            System.out.println("REGISTER: about to create user...");
+            User user = userDao.create(new User(0, newUser.getUsername(), newUser.getPassword(), newUser.getRole()));
+            System.out.println("REGISTER: created user id = " + user.getId());
+
+            System.out.println("REGISTER: about to create profile...");
             Profile profile = new Profile();
             profile.setUserId(user.getId());
             profile.setFirstName("");
@@ -93,12 +99,15 @@ public class AuthenticationController {
             profile.setState("");
             profile.setZip("");
             profileDao.create(profile);
+            System.out.println("REGISTER: profile created!");
 
             return new ResponseEntity<>(user, HttpStatus.CREATED);
         }
         catch (Exception e)
         {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            //throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Oops... our bad.");
+            e.printStackTrace(); // IMPORTANT: shows the real reason in console
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
